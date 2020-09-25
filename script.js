@@ -191,6 +191,72 @@ function sendBalanceCheck(){
     }  
 }
 
+function sendNikkei(){
+    var sheet = ss.getSheetByName("日経テレコン利用ID・PW変更");
+    var startRow = 6;
+    
+    var lastColum = sheet.getLastColumn();
+    var lastRow = sheet.getLastRow();
+    var numRows = lastRow - startRow + 1;
+
+    var dataRange = sheet.getRange(startRow, 1, numRows, lastColum);
+    var data = dataRange.getValues();
+
+    var strFrom = sheet.getRange(1,2).getValue();
+
+    var docBaseID = sheet.getRange(2,2).getValue();
+    var strFixedSubject = sheet.getRange(3,2).getValue();
+
+    // テンプレートテキストの取得  
+    var docBaseTemplate = DocumentApp.openById(docBaseID);
+    var strBaseTemplate = docBaseTemplate.getBody().getText();
+
+    for (var i = 0; i < data.length; i++) {
+        var row = data[i];
+        row.rowNumber = i + startRow;
+
+        // Result列がブランクであれば処理を実行    
+        if (!row[10]) { 
+            var result = "";
+
+            try
+            {
+                var strTo = row[0];
+                var strCc = row[1];
+                var strDestinationSubject = row[2];
+
+                // メールの件名を作成
+                var strSubject = "※重要【" + strDestinationSubject + "】" + strFixedSubject;
+
+                var options = {};
+                options.cc = strCc;
+                options.from = strFrom;
+
+                // 変数を取得
+                var strVal1 = row[3];
+                var strVal2 = row[4];
+                var strVal3 = row[5];
+                var strVal4 = row[6];
+                var strVal5 = row[7];
+                var strVal6 = row[8];
+                var strVal7 = row[9];
+                
+                // メールのbase部分の変数を置換
+                var strBody = strBaseTemplate.replace("\{VALUE1\}",strVal1).replace("\{VALUE2\}",strVal2).replace("\{VALUE3\}",strVal3).replace("\{VALUE4\}",strVal4).replace("\{VALUE5\}",strVal5).replace("\{VALUE6\}",strVal6).replace("\{VALUE7\}",strVal7); 
+
+                // メール送信実行       
+                GmailApp.sendEmail(strTo,strSubject,strBody,options);
+
+                result = "Success"; 
+            }catch(e){
+                result = "Error:" + e;
+            }
+
+            // 実行結果をResult列にセット
+            sheet.getRange(row.rowNumber, lastColum).setValue(result); 
+        }
+    }  
+}
 
 
 
