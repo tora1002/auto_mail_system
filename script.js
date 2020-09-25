@@ -1,18 +1,25 @@
+// グローバル変数
 var ss = SpreadsheetApp.getActiveSpreadsheet();
-var sheet = ss.getSheetByName("シート1");
 
 // 実行メニューを作成
 function onOpen() {
     var ui = SpreadsheetApp.getUi();
-    var menu = ui.createMenu("GAS実行");
-    menu.addItem("メール送信実行_雛形", "sendMergeEmail");
+    var menu = ui.createMenu("メールメニュー");
+    menu.addItem("領収書不備連絡", "sendReceiptMistake");
+    menu.addItem("収支確認連絡", "send");
+    menu.addItem("日経テレコン利用ID・PW変更連絡", "send");
+    menu.addItem("未着・不備請求書連絡", "send");
+    menu.addItem("検収チェックシート捺印連絡", "send");
+    menu.addItem("未着・不備請求書連絡", "send");
+    menu.addItem("検修書提出連絡", "send");
     menu.addToUi();
 }
 
-function sendMergeEmail(){
+function sendReceiptMistake(){
+    var sheet = ss.getSheetByName("領収書不備連絡");
     var lastColum = sheet.getLastColumn();
     var lastRow = sheet.getLastRow();
-    var startRow = 6;
+    var startRow = 8;
     var numRows = lastRow - startRow + 1;
 
     var dataRange = sheet.getRange(startRow, 1, numRows, lastColum);
@@ -22,9 +29,9 @@ function sendMergeEmail(){
 
     var docBaseID = sheet.getRange(2,2).getValue();
     var docVariableID = sheet.getRange(3,2).getValue();
-    
-    // 添付ファイル指定がある場合はoptionsに追加（※未使用）
-    //var attachementID = sheet.getRange(3,2).getValue();
+
+    var accountingMonth = sheet.getRange(4,2).getValue();
+    var strFixedSubject = sheet.getRange(5,2).getValue();
 
     // テンプレートテキストの取得  
     var docBaseTemplate = DocumentApp.openById(docBaseID);
@@ -44,17 +51,14 @@ function sendMergeEmail(){
             {
                 var strTo = row[0];
                 var strCc = row[1];
-                var strSubject = row[2];
+                var strDestinationSubject = row[2];
+
+                // メールの件名を作成
+                var strSubject = "【" + accountingMonth + "月経費】" + strFixedSubject + "（" + strDestinationSubject + "）";
 
                 var options = {};
                 options.cc = strCc;
                 options.from = strFrom;
-                
-                // 添付ファイル指定がある場合はoptionsに追加（※未使用）
-                //if(attachementID){
-                //    var attachment = DriveApp.getFileById(attachementID);
-                //    options.attachments = attachment
-                //}
 
                 // メールのbase部分の変数を取得
                 var strVal1 = row[3];
@@ -79,7 +83,7 @@ function sendMergeEmail(){
                     var strVal7 = data[i+1][9];
                     var strVal8 = data[i+1][10];
 
-                    var strVariable = strVariable + strVariableTemplate.replace("\{VALUE5\}",strVal5).replace("\{VALUE6\}",strVal6).replace("\{VALUE7\}",strVal7).replace("\{VALUE8\}",strVal8); 
+                    var strVariable = strVariable + strVariableTemplate.replace("\{VALUE5\}",strVal5).replace("\{VALUE6\}",strVal6).replace("\{VALUE7\}",strVal7).replace("\{VALUE8\}",strVal8);
 
                     i = i + 1;
                 }
@@ -100,4 +104,5 @@ function sendMergeEmail(){
         }
     }  
 }
+
 
