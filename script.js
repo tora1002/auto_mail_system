@@ -8,10 +8,10 @@ function onOpen() {
     menu.addItem("領収書不備", "sendReceiptMistake");
     menu.addItem("収支確認", "sendBalanceCheck");
     menu.addItem("日経テレコン利用ID・PW変更", "sendNikkei");
-    menu.addItem("未着・不備請求書", "send");
-    menu.addItem("検収チェックシート捺印", "send");
-    menu.addItem("未着・不備請求書", "send");
-    menu.addItem("検修書提出", "send");
+    menu.addItem("未着・不備請求書", "sendInvoiceMistake");
+    menu.addItem("検収チェックシート捺印", "sendSeal");
+    menu.addItem("新規取引外注先", "sendNewSubcontractor");
+    menu.addItem("検修書提出", "sendInspectionBook");
     menu.addToUi();
 }
 
@@ -241,7 +241,7 @@ function sendNikkei(){
                 var strVal6 = row[8];
                 var strVal7 = row[9];
                 
-                // メールのbase部分の変数を置換
+                // メールの変数を置換
                 var strBody = strBaseTemplate.replace("\{VALUE1\}",strVal1).replace("\{VALUE2\}",strVal2).replace("\{VALUE3\}",strVal3).replace("\{VALUE4\}",strVal4).replace("\{VALUE5\}",strVal5).replace("\{VALUE6\}",strVal6).replace("\{VALUE7\}",strVal7); 
 
                 // メール送信実行       
@@ -258,7 +258,163 @@ function sendNikkei(){
     }  
 }
 
+function sendInvoiceMistake(){
+    var sheet = ss.getSheetByName("未着・不備請求書");
+    var startRow = 8;
+    
+    var lastColum = sheet.getLastColumn();
+    var lastRow = sheet.getLastRow();
+    var numRows = lastRow - startRow + 1;
 
+    var dataRange = sheet.getRange(startRow, 1, numRows, lastColum);
+    var data = dataRange.getValues();
+
+    var strFrom = sheet.getRange(1,2).getValue();
+
+    var docBaseID = sheet.getRange(2,2).getValue();
+    var docVariableID = sheet.getRange(3,2).getValue();
+
+    var accountingMonth = sheet.getRange(4,2).getValue();
+    var strFixedSubject = sheet.getRange(5,2).getValue();
+
+    // テンプレートテキストの取得  
+    var docBaseTemplate = DocumentApp.openById(docBaseID);
+    var strBaseTemplate = docBaseTemplate.getBody().getText();
+
+    for (var i = 0; i < data.length; i++) {
+        var row = data[i];
+        row.rowNumber = i + startRow;
+
+        // Result列がブランクであれば処理を実行    
+        if (!row[10]) { 
+            var result = "";
+
+            try
+            {
+                var strTo = row[0];
+                var strCc = row[1];
+                
+                // 使うか確認？
+                var strDestinationSubject = row[2];
+
+                // メールの件名を作成
+                var strSubject = strFixedSubject + "（" + accountingMonth + "月分）";
+
+                var options = {};
+                options.cc = strCc;
+                options.from = strFrom;
+
+                // メールの変数を取得
+                var strVal1 = row[3];
+                var strVal2 = row[4];
+                
+                // メールのbase部分の変数を置換
+                var strBody = strBaseTemplate.replace("\{VALUE1\}",strVal1).replace("\{VALUE2\}",strVal2); 
+
+                // メールの表のヘッダーを作成
+                var strVariable = "請求書日付　支払先　金額　内容　ステータス\n";
+
+                // メールの表の可変部分の変数を取得
+                var strVal4 = row[5];
+                var strVal5 = row[6];
+                var strVal6 = row[7];
+                var strVal7 = row[8];
+                var strVal8 = row[9];
+
+                var strVariable = strVariable + strVal4 + "　" + strVal5 + "　" + strVal6 + "　" + strVal7 + "　" + strVal8 + "\n";
+
+                while (data[i+1] != undefined && strTo == data[i+1][0]) {
+                    var strVal4 = data[i+1][5];
+                    var strVal5 = data[i+1][6];
+                    var strVal6 = data[i+1][7];
+                    var strVal7 = data[i+1][8];
+                    var strVal8 = data[i+1][9];
+
+                    var strVariable = strVariable + strVal4 + "　" + strVal5 + "　" + strVal6 + "　" + strVal7 + "　" + strVal8 + "\n";
+
+                    i = i + 1;
+                }
+
+                // メールのvariable部分の変数を置換
+                var strBody = strBody.replace("\{VALUE_variable\}",strVariable); 
+
+                // メール送信実行       
+                GmailApp.sendEmail(strTo,strSubject,strBody,options);
+
+                result = "Success"; 
+            }catch(e){
+                result = "Error:" + e;
+            }
+
+            // 実行結果をResult列にセット
+            sheet.getRange(row.rowNumber, lastColum).setValue(result); 
+        }
+    }  
+}
+
+
+
+
+
+
+function sendSeal(){
+    var sheet = ss.getSheetByName("検収チェックシート捺印");
+    var startRow = 6;
+    
+    var lastColum = sheet.getLastColumn();
+    var lastRow = sheet.getLastRow();
+    var numRows = lastRow - startRow + 1;
+
+    var dataRange = sheet.getRange(startRow, 1, numRows, lastColum);
+    var data = dataRange.getValues();
+
+    var strFrom = sheet.getRange(1,2).getValue();
+
+    var docBaseID = sheet.getRange(2,2).getValue();
+    var strSubject = sheet.getRange(3,2).getValue();
+
+    // テンプレートテキストの取得  
+    var docBaseTemplate = DocumentApp.openById(docBaseID);
+    var strBaseTemplate = docBaseTemplate.getBody().getText();
+
+    for (var i = 0; i < data.length; i++) {
+        var row = data[i];
+        row.rowNumber = i + startRow;
+
+        // Result列がブランクであれば処理を実行    
+        if (!row[5]) { 
+            var result = "";
+
+            try
+            {
+                var strTo = row[0];
+                var strCc = row[1];
+
+                var options = {};
+                options.cc = strCc;
+                options.from = strFrom;
+
+                // 変数を取得
+                var strVal1 = row[2];
+                var strVal2 = row[3];
+                var strVal3 = row[4];
+                
+                // メールの変数を置換
+                var strBody = strBaseTemplate.replace("\{VALUE1\}",strVal1).replace("\{VALUE2\}",strVal2).replace("\{VALUE3\}",strVal3); 
+
+                // メール送信実行       
+                GmailApp.sendEmail(strTo,strSubject,strBody,options);
+
+                result = "Success"; 
+            }catch(e){
+                result = "Error:" + e;
+            }
+
+            // 実行結果をResult列にセット
+            sheet.getRange(row.rowNumber, lastColum).setValue(result); 
+        }
+    }  
+}
 
 
 
