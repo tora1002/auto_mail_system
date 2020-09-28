@@ -617,9 +617,9 @@ function sendInvoiceMistakeHtml() {
     }  
 }
 
-function sendNewSubcontractorHtMl() {
+function sendNewSubcontractorHtml() {
     var sheet = ss.getSheetByName("新規取引外注先");
-    var startRow = 7;
+    var startRow = 6;
     
     var lastColum = sheet.getLastColumn();
     var lastRow = sheet.getLastRow();
@@ -630,12 +630,8 @@ function sendNewSubcontractorHtMl() {
 
     var strFrom = sheet.getRange(1,2).getValue();
 
-    var strVal1 = sheet.getRange(4,2).getValue();
-    var strFixedSubject = sheet.getRange(5,2).getValue();
-
-    // テンプレートテキストの取得  
-    var docBaseTemplate = DocumentApp.openById(docBaseID);
-    var strBaseTemplate = docBaseTemplate.getBody().getText();
+    var strVal1 = sheet.getRange(2,2).getValue();
+    var strFixedSubject = sheet.getRange(3,2).getValue();
 
     for (var i = 0; i < data.length; i++) {
         var row = data[i];
@@ -649,7 +645,6 @@ function sendNewSubcontractorHtMl() {
             {
                 var strTo = row[0];
                 var strCc = row[1];
-                
                 var strDestinationSubject = row[2];
 
                 // メールの件名を作成
@@ -663,25 +658,25 @@ function sendNewSubcontractorHtMl() {
                 html += "<br />";
 
                 // 表の見出し部分を作成
-                html += "<table align='center'>";
+                html += "<table style='border-collapse:collapse;'>";
                 html += "<tr bgcolor='#ffffc0'>";
-                html += "<th>個人or法人</th>";
-                html += "<th>正式名称</th>";
-                html += "<th>最終更新者(営業)</th>";
+                html += "<th style='border:1px solid #ccc; padding:10px;'>個人 or 法人</th>";
+                html += "<th style='border:1px solid #ccc; padding:10px;'>正式名称</th>";
+                html += "<th style='border:1px solid #ccc; padding:10px;'>最終更新者(営業)</th>";
                 html += "</tr>";
                 
                 // 表のデータ部分を作成
                 html += "<tr>";
-                html += "<td>" + row[3] + "</td>";
-                html += "<td>" + row[4] + "</td>";
-                html += "<td>" + row[5] + "</td>";
+                html += "<td style='border:1px solid #ccc; padding:10px;'>" + row[3] + "</td>";
+                html += "<td style='border:1px solid #ccc; padding:10px;'>" + row[4] + "</td>";
+                html += "<td style='border:1px solid #ccc; padding:10px;'>" + row[5] + "</td>";
                 html += "</tr>";
                 
                 while (data[i+1] != undefined && strTo == data[i+1][0]) {
                     html += "<tr>";
-                    html += "<td>" + data[i+1][3] + "</td>";
-                    html += "<td>" + data[i+1][4] + "</td>";
-                    html += "<td>" + data[i+1][5] + "</td>";
+                    html += "<td style='border:1px solid #ccc; padding:10px;'>" + data[i+1][3] + "</td>";
+                    html += "<td style='border:1px solid #ccc; padding:10px;'>" + data[i+1][4] + "</td>";
+                    html += "<td style='border:1px solid #ccc; padding:10px;'>" + data[i+1][5] + "</td>";
                     html += "</tr>";
 
                     i = i + 1;
