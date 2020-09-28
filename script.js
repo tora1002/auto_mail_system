@@ -496,6 +496,127 @@ function sendNewSubcontractor() {
     }  
 }
 
+function sendInvoiceMistakeHtml() {
+    var sheet = ss.getSheetByName("未着・不備請求書");
+    var startRow = 8;
+    
+    var lastColum = sheet.getLastColumn();
+    var lastRow = sheet.getLastRow();
+    var numRows = lastRow - startRow + 1;
+
+    var dataRange = sheet.getRange(startRow, 1, numRows, lastColum);
+    var data = dataRange.getValues();
+
+    var strFrom = sheet.getRange(1,2).getValue();
+
+    var accountingMonth = sheet.getRange(4,2).getValue();
+    var strFixedSubject = sheet.getRange(5,2).getValue();
+
+    for (var i = 0; i < data.length; i++) {
+        var row = data[i];
+        row.rowNumber = i + startRow;
+
+        // Result列がブランクであれば処理を実行    
+        if (!row[10]) { 
+            var result = "";
+
+            try
+            {
+                var strTo = row[0];
+                var strCc = row[1];
+                
+                // 使うか確認？
+                var strDestinationSubject = row[2];
+
+                // メールの件名を作成
+                var strSubject = "【" + strDestinationSubject  + "】" + strFixedSubject + "（" + accountingMonth + "月分）";
+
+                // メールの変数を取得
+                var strVal1 = row[3];
+                var strVal2 = row[4];
+
+                // メールの本文を作成
+                var html = "ご担当者様<br />";
+                html += "<br />";
+                html += "お疲れ様です。<br />";
+                html += "収支表のご提出ありがとうございました。<br />";
+                html += "<br />";
+                html += "下記の請求書等に不備がございます。<br />";
+                html += "手配していただき、提出期日までにご提出をお願いいたします。<br />";
+                html += "<br />";
+                html += "<p style='font-weight: bold; text-decoration: underline; color: #FF0000;'>提出期日： " + strVal1 + "</p><br />";
+                html += "<p style='font-weight: bold;'>※ご提出の際は " + strVal2 + " さんまでお願い致します。</p><br />";
+                html += "<br />";
+
+                // 表の見出し部分を作成
+                html += "<table align='center'>";
+                html += "<tr bgcolor='#ffffc0'>";
+                html += "<th>請求書日付</th>";
+                html += "<th>支払先</th>";
+                html += "<th>金額</th>";
+                html += "<th>内容</th>";
+                html += "<th>ステータス</th>";
+                html += "</tr>";
+
+                // 表のデータ部分を作成
+                html += "<tr>";
+                html += "<td>" + row[5] + "</td>";
+                html += "<td>" + row[6] + "</td>";
+                html += "<td>" + row[7] + "</td>";
+                html += "<td>" + row[8] + "</td>";
+                html += "<td>" + row[9] + "</td>";
+                html += "</tr>";
+
+                while (data[i+1] != undefined && strTo == data[i+1][0]) {
+                    html += "<tr>";
+                    html += "<td>" + data[i+1][5] + "</td>";
+                    html += "<td>" + data[i+1][6] + "</td>";
+                    html += "<td>" + data[i+1][7] + "</td>";
+                    html += "<td>" + data[i+1][8] + "</td>";
+                    html += "<td>" + data[i+1][9] + "</td>";
+                    html += "</tr>";
+
+                    i = i + 1;
+                }
+
+                html += "----------------------------------------<br />";
+                html += "<p style='font-weight: bold; color: #FF0000;'>【請求書なしの請求書とは・・・】</p> <br />";
+                html += "<p style='font-weight: bold;'>■　請求書の添付がない</p><br />";
+                html += "<p style='font-weight: bold;'>■　見積書、納品書の添付</p><br />";
+                html += "<br />";
+                html += "<p style='font-weight: bold; color: #FF0000;'>【原本なしの請求書とは・・・】</p><br />";
+                html += "<p style='font-weight: bold;'>■　金額違い</p><br />";
+                html += "<p style='font-weight: bold;'>■　社判なし</p><br />";
+                html += "<p style='font-weight: bold;'>■　PDF請求書</p><br />";
+                html += "<br />";
+                html += "PDF請求書のみ発行している企業、個人の場合は、<br />";
+                html += "<p style='font-weight: bold; color: #FF0000;'>「原本」と記載して担当者の印鑑</p> を押してください。<br />";
+                html += "<p style='font-weight: bold; text-decoration: underline; background-color: #FFFF00;'>※ない場合は原本未着扱いとしてお支払いを致しません。</p><br />";
+                html += "<br />";
+                html += "【宛名間違いの請求書とは・・・】<br />";
+                html += "例えば、AN,PL,INで受注している案件に<br />";
+                html += "ベクトル宛の請求書が発行されている場合が上記にあたります。<br />";
+                html += "----------------------------------------<br />";
+
+                var options = {};
+                options.cc = strCc;
+                options.from = strFrom;
+                options.htmlBody = html;
+
+                // メール送信実行       
+                GmailApp.sendEmail(strTo, strSubject, "", options);
+
+                result = "Success"; 
+            }catch(e){
+                result = "Error:" + e;
+            }
+
+            // 実行結果をResult列にセット
+            sheet.getRange(row.rowNumber, lastColum).setValue(result); 
+        }
+    }  
+}
+
 function sendNewSubcontractorHtMl() {
     var sheet = ss.getSheetByName("新規取引外注先");
     var startRow = 7;
@@ -508,9 +629,6 @@ function sendNewSubcontractorHtMl() {
     var data = dataRange.getValues();
 
     var strFrom = sheet.getRange(1,2).getValue();
-
-    var docBaseID = sheet.getRange(2,2).getValue();
-    var docVariableID = sheet.getRange(3,2).getValue();
 
     var strVal1 = sheet.getRange(4,2).getValue();
     var strFixedSubject = sheet.getRange(5,2).getValue();
