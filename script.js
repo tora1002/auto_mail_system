@@ -15,7 +15,7 @@ function onOpen() {
     menu.addToUi();
 }
 
-function sendReceiptMistake(){
+function sendReceiptMistake() {
     var sheet = ss.getSheetByName("領収書不備");
     var startRow = 8;
     
@@ -106,7 +106,7 @@ function sendReceiptMistake(){
     }  
 }
 
-function sendBalanceCheck(){
+function sendBalanceCheck() {
     var sheet = ss.getSheetByName("収支確認");
     var startRow = 7;
     
@@ -191,7 +191,7 @@ function sendBalanceCheck(){
     }  
 }
 
-function sendNikkei(){
+function sendNikkei() {
     var sheet = ss.getSheetByName("日経テレコン利用ID・PW変更");
     var startRow = 6;
     
@@ -258,7 +258,7 @@ function sendNikkei(){
     }  
 }
 
-function sendInvoiceMistake(){
+function sendInvoiceMistake() {
     var sheet = ss.getSheetByName("未着・不備請求書");
     var startRow = 8;
     
@@ -352,7 +352,7 @@ function sendInvoiceMistake(){
     }  
 }
 
-function sendSeal(){
+function sendSeal() {
     var sheet = ss.getSheetByName("検収チェックシート捺印");
     var startRow = 6;
     
@@ -411,7 +411,7 @@ function sendSeal(){
     }  
 }
 
-function sendNewSubcontractor(){
+function sendNewSubcontractor() {
     var sheet = ss.getSheetByName("新規取引外注先");
     var startRow = 7;
     
@@ -496,4 +496,106 @@ function sendNewSubcontractor(){
     }  
 }
 
+function sendNewSubcontractorHtMl() {
+    var sheet = ss.getSheetByName("新規取引外注先");
+    var startRow = 7;
+    
+    var lastColum = sheet.getLastColumn();
+    var lastRow = sheet.getLastRow();
+    var numRows = lastRow - startRow + 1;
+
+    var dataRange = sheet.getRange(startRow, 1, numRows, lastColum);
+    var data = dataRange.getValues();
+
+    var strFrom = sheet.getRange(1,2).getValue();
+
+    var docBaseID = sheet.getRange(2,2).getValue();
+    var docVariableID = sheet.getRange(3,2).getValue();
+
+    var strVal1 = sheet.getRange(4,2).getValue();
+    var strFixedSubject = sheet.getRange(5,2).getValue();
+
+    // テンプレートテキストの取得  
+    var docBaseTemplate = DocumentApp.openById(docBaseID);
+    var strBaseTemplate = docBaseTemplate.getBody().getText();
+
+    for (var i = 0; i < data.length; i++) {
+        var row = data[i];
+        row.rowNumber = i + startRow;
+
+        // Result列がブランクであれば処理を実行    
+        if (!row[10]) { 
+            var result = "";
+
+            try
+            {
+                var strTo = row[0];
+                var strCc = row[1];
+                
+                var strDestinationSubject = row[2];
+
+                // メールの件名を作成
+                var strSubject = "【" + strDestinationSubject + "】" + strFixedSubject;
+
+                // メールの本文を作成
+                var html = "ご担当者様<br />";
+                html += "<br />";
+                html += "お疲れ様です。<br />";
+                html += strVal1 + "月に新規取引が開始された外注先をお送りします。<br />";
+                html += "<br />";
+
+                // 表の見出し部分を作成
+                html += "<table align='center'>";
+                html += "<tr bgcolor='#ffffc0'>";
+                html += "<th>個人or法人</th>";
+                html += "<th>正式名称</th>";
+                html += "<th>最終更新者(営業)</th>";
+                html += "</tr>";
+                
+                // 表のデータ部分を作成
+                html += "<tr>";
+                html += "<td>" + row[3] + "</td>";
+                html += "<td>" + row[4] + "</td>";
+                html += "<td>" + row[5] + "</td>";
+                html += "</tr>";
+                
+                while (data[i+1] != undefined && strTo == data[i+1][0]) {
+                    html += "<tr>";
+                    html += "<td>" + data[i+1][3] + "</td>";
+                    html += "<td>" + data[i+1][4] + "</td>";
+                    html += "<td>" + data[i+1][5] + "</td>";
+                    html += "</tr>";
+
+                    i = i + 1;
+                }
+                
+                html += "</table>";
+
+                html += "<br />";
+                html += "「取引登録申請書」（法人or個人）をお送りして<br />";
+                html += "記入・捺印をいただいたうえで管理部にご提出ください。<br />";
+                html += "管理部宛に直接お送りいただいても構いません。 <br />";
+                html += "<br />";
+                html += "詳細については <a href='https://sites.google.com/a/vectorinc.co.jp/pp/home/contract/law-rule'>社内ポータル</a> をご確認ください<br />";
+                html += "<br />";
+                html += "以上、よろしくお願いいたします。<br />";
+
+                var options = {};
+                options.cc = strCc;
+                options.from = strFrom;
+                options.htmlBody = html;
+
+                // メール送信実行       
+                GmailApp.sendEmail(strTo, strSubject, "", options);
+
+                result = "Success"; 
+            }catch(e){
+                result = "Error:" + e;
+            }
+
+            // 実行結果をResult列にセット
+            sheet.getRange(row.rowNumber, lastColum).setValue(result); 
+        }
+    }  
+}
 
