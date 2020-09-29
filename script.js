@@ -11,7 +11,7 @@ function onOpen() {
     menu.addItem("未着・不備請求書", "sendInvoiceMistakeHtml");
     menu.addItem("検収チェックシート捺印", "sendSealHtml");
     menu.addItem("新規取引外注先", "sendNewSubcontractorHtml");
-    //menu.addItem("検修書提出", "sendInspectionBook");
+    menu.addItem("検修書提出", "sendInspectionBookHtml");
     menu.addToUi();
 }
 
@@ -546,6 +546,121 @@ function sendNewSubcontractorHtml() {
     }  
 }
 
+function sendInspectionBookHtml() {
+    var sheet = ss.getSheetByName("検修書提出");
+    var startRow = 5;
+    
+    var lastColum = sheet.getLastColumn();
+    var lastRow = sheet.getLastRow();
+    var numRows = lastRow - startRow + 1;
+
+    var dataRange = sheet.getRange(startRow, 1, numRows, lastColum);
+    var data = dataRange.getValues();
+
+    var strFrom = sheet.getRange(1,2).getValue();
+    var strFixedSubject = sheet.getRange(2,2).getValue();
+
+    for (var i = 0; i < data.length; i++) {
+        var row = data[i];
+        row.rowNumber = i + startRow;
+
+        // Result列がブランクであれば処理を実行    
+        if (!row[17]) { 
+            var result = "";
+
+            try
+            {
+                var strTo = row[0];
+                var strCc = row[1];
+
+                // メールの件名を作成
+                var strSubject = "※重要※【" + row[2] + "】" + strFixedSubject + " / " + row[3]  + "回目連絡";
+
+                // メールの本文を作成
+                var html = "<div>ご担当者様</div>";
+                html += "<br />";
+                html += "<div>お疲れ様です。</div>";
+                html += "<div>ベクトル管理部の " + row[4] + " です。</div>";
+                html += "<br />";
+                html += "<div>回収状況を更新しましたのでご確認をお願いいたします。</div>";
+                html += "<br />";
+
+                // 表の見出し部分を作成
+                html += "<table style='border-collapse:collapse;'>";
+                html += "<tr>";
+                html += "<th style='border:1px solid #ccc; padding:3px 5px;' bgcolor='#ffffc0'>検収書チェック</th>";
+                html += "<th style='border:1px solid #ccc; padding:3px 5px;'>JOBNo</th>";
+                html += "<th style='border:1px solid #ccc; padding:3px 5px;'>受託会社</th>";
+                html += "<th style='border:1px solid #ccc; padding:3px 5px;'>案件名</th>";
+                html += "<th style='border:1px solid #ccc; padding:3px 5px;'>営業担当者</th>";
+                html += "<th style='border:1px solid #ccc; padding:3px 5px;'>担当部門</th>";
+                html += "<th style='border:1px solid #ccc; padding:3px 5px;'>請求先名</th>";
+                html += "<th style='border:1px solid #ccc; padding:3px 5px;'>売上予定日</th>";
+                html += "<th style='border:1px solid #ccc; padding:3px 5px;'>売上日</th>";
+                html += "<th style='border:1px solid #ccc; padding:3px 5px;'>売上計上(予定実績)額</th>";
+                html += "<th style='border:1px solid #ccc; padding:3px 5px;'>プロジェクトコード(メイン)</th>";
+                html += "<th style='border:1px solid #ccc; padding:3px 5px;'>プロジェクト名(メイン)</th>";
+                html += "</tr>";
+                
+                // 表のデータ部分を作成
+                html += "<tr>";
+                html += "<td style='border:1px solid #ccc; padding:3px 5px;' bgcolor='#ffffc0'>" + row[5] + "</td>";
+                html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + row[6] + "</td>";
+                html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + row[7] + "</td>";
+                html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + row[8] + "</td>";
+                html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + row[9] + "</td>";
+                html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + row[10] + "</td>";
+                html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + row[11] + "</td>";
+                html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + row[12] + "</td>";
+                html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + row[13] + "</td>";
+                html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + row[14] + "</td>";
+                html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + row[15] + "</td>";
+                html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + row[16] + "</td>";
+                html += "</tr>";
+                
+                while (data[i+1] != undefined && strTo == data[i+1][0]) {
+                    html += "<tr>";
+                    html += "<td style='border:1px solid #ccc; padding:3px 5px;' bgcolor='#ffffc0'>" + data[i+1][5] + "</td>";
+                    html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + data[i+1][6] + "</td>";
+                    html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + data[i+1][7] + "</td>";
+                    html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + data[i+1][8] + "</td>";
+                    html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + data[i+1][9] + "</td>";
+                    html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + data[i+1][10] + "</td>";
+                    html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + data[i+1][11] + "</td>";
+                    html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + data[i+1][12] + "</td>";
+                    html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + data[i+1][13] + "</td>";
+                    html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + data[i+1][14] + "</td>";
+                    html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + data[i+1][15] + "</td>";
+                    html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + data[i+1][16] + "</td>";
+                    html += "</tr>";
+
+                    i = i + 1;
+                }
+                
+                html += "</table>";
+
+                html += "<br />";
+                html += "<div>以上、よろしくお願いいたします。</div>";
+
+                var options = {};
+                options.cc = strCc;
+                options.from = strFrom;
+                options.htmlBody = html;
+
+                // メール送信実行       
+                GmailApp.sendEmail(strTo, strSubject, "", options);
+
+                result = "Success"; 
+            }catch(e){
+                result = "Error:" + e;
+            }
+
+            // 実行結果をResult列にセット
+            sheet.getRange(row.rowNumber, lastColum).setValue(result); 
+        }
+    }  
+}
+
 // 未使用
 function sendReceiptMistake() {
     var sheet = ss.getSheetByName("領収書不備");
@@ -621,396 +736,6 @@ function sendReceiptMistake() {
                     i = i + 1;
                 }
                 
-                // メールのvariable部分の変数を置換
-                var strBody = strBody.replace("\{VALUE_variable\}",strVariable); 
-
-                // メール送信実行       
-                GmailApp.sendEmail(strTo,strSubject,strBody,options);
-
-                result = "Success"; 
-            }catch(e){
-                result = "Error:" + e;
-            }
-
-            // 実行結果をResult列にセット
-            sheet.getRange(row.rowNumber, lastColum).setValue(result); 
-        }
-    }  
-}
-
-function sendBalanceCheck() {
-    var sheet = ss.getSheetByName("収支確認");
-    var startRow = 7;
-    
-    var lastColum = sheet.getLastColumn();
-    var lastRow = sheet.getLastRow();
-    var numRows = lastRow - startRow + 1;
-
-    var dataRange = sheet.getRange(startRow, 1, numRows, lastColum);
-    var data = dataRange.getValues();
-
-    var strFrom = sheet.getRange(1,2).getValue();
-
-    var docBaseID = sheet.getRange(2,2).getValue();
-    var docVariableID = sheet.getRange(3,2).getValue();
-
-    var strSubject = sheet.getRange(4,2).getValue();
-
-    // テンプレートテキストの取得  
-    var docBaseTemplate = DocumentApp.openById(docBaseID);
-    var docVariableTemplate = DocumentApp.openById(docVariableID);
-    var strBaseTemplate = docBaseTemplate.getBody().getText();
-    var strVariableTemplate = docVariableTemplate.getBody().getText();
-
-    for (var i = 0; i < data.length; i++) {
-        var row = data[i];
-        row.rowNumber = i + startRow;
-
-        // Result列がブランクであれば処理を実行    
-        if (!row[9]) { 
-            var result = "";
-
-            try
-            {
-                var strTo = row[0];
-                var strCc = row[1];
-
-                var options = {};
-                options.cc = strCc;
-                options.from = strFrom;
-
-                // メールのbase部分の変数を取得
-                var strVal1 = row[2];
-                var strVal2 = row[3];
-                var strVal3 = row[4];
-                
-                // メールのbase部分の変数を置換
-                var strBody = strBaseTemplate.replace("\{VALUE1\}",strVal1).replace("\{VALUE2\}",strVal2).replace("\{VALUE3\}",strVal3); 
-
-                // メールのvariable部分の変数を取得
-                var strVal4 = row[5];
-                var strVal5 = row[6];
-                var strVal6 = row[7];
-                var strVal7 = row[8];
-
-                var strVariable = strVariableTemplate.replace("\{VALUE4\}",strVal4).replace("\{VALUE5\}",strVal5).replace("\{VALUE6\}",strVal6).replace("\{VALUE7\}",strVal7); 
-
-                while (data[i+1] != undefined && strTo == data[i+1][0]) {
-                    var strVal4 = data[i+1][5];
-                    var strVal5 = data[i+1][6];
-                    var strVal6 = data[i+1][7];
-                    var strVal7 = data[i+1][8];
-
-                    var strVariable = strVariable + strVariableTemplate.replace("\{VALUE4\}",strVal4).replace("\{VALUE5\}",strVal5).replace("\{VALUE6\}",strVal6).replace("\{VALUE7\}",strVal7);
-
-                    i = i + 1;
-                }
-                
-                // メールのvariable部分の変数を置換
-                var strBody = strBody.replace("\{VALUE_variable\}",strVariable); 
-
-                // メール送信実行       
-                GmailApp.sendEmail(strTo,strSubject,strBody,options);
-
-                result = "Success"; 
-            }catch(e){
-                result = "Error:" + e;
-            }
-
-            // 実行結果をResult列にセット
-            sheet.getRange(row.rowNumber, lastColum).setValue(result); 
-        }
-    }  
-}
-
-function sendNikkei() {
-    var sheet = ss.getSheetByName("日経テレコン利用ID・PW変更");
-    var startRow = 6;
-    
-    var lastColum = sheet.getLastColumn();
-    var lastRow = sheet.getLastRow();
-    var numRows = lastRow - startRow + 1;
-
-    var dataRange = sheet.getRange(startRow, 1, numRows, lastColum);
-    var data = dataRange.getValues();
-
-    var strFrom = sheet.getRange(1,2).getValue();
-
-    var docBaseID = sheet.getRange(2,2).getValue();
-    var strFixedSubject = sheet.getRange(3,2).getValue();
-
-    // テンプレートテキストの取得  
-    var docBaseTemplate = DocumentApp.openById(docBaseID);
-    var strBaseTemplate = docBaseTemplate.getBody().getText();
-
-    for (var i = 0; i < data.length; i++) {
-        var row = data[i];
-        row.rowNumber = i + startRow;
-
-        // Result列がブランクであれば処理を実行    
-        if (!row[10]) { 
-            var result = "";
-
-            try
-            {
-                var strTo = row[0];
-                var strCc = row[1];
-                var strDestinationSubject = row[2];
-
-                // メールの件名を作成
-                var strSubject = "※重要【" + strDestinationSubject + "】" + strFixedSubject;
-
-                var options = {};
-                options.cc = strCc;
-                options.from = strFrom;
-
-                // 変数を取得
-                var strVal1 = row[3];
-                var strVal2 = row[4];
-                var strVal3 = row[5];
-                var strVal4 = row[6];
-                var strVal5 = row[7];
-                var strVal6 = row[8];
-                var strVal7 = row[9];
-                
-                // メールの変数を置換
-                var strBody = strBaseTemplate.replace("\{VALUE1\}",strVal1).replace("\{VALUE2\}",strVal2).replace("\{VALUE3\}",strVal3).replace("\{VALUE4\}",strVal4).replace("\{VALUE5\}",strVal5).replace("\{VALUE6\}",strVal6).replace("\{VALUE7\}",strVal7); 
-
-                // メール送信実行       
-                GmailApp.sendEmail(strTo,strSubject,strBody,options);
-
-                result = "Success"; 
-            }catch(e){
-                result = "Error:" + e;
-            }
-
-            // 実行結果をResult列にセット
-            sheet.getRange(row.rowNumber, lastColum).setValue(result); 
-        }
-    }  
-}
-
-function sendInvoiceMistake() {
-    var sheet = ss.getSheetByName("未着・不備請求書");
-    var startRow = 8;
-    
-    var lastColum = sheet.getLastColumn();
-    var lastRow = sheet.getLastRow();
-    var numRows = lastRow - startRow + 1;
-
-    var dataRange = sheet.getRange(startRow, 1, numRows, lastColum);
-    var data = dataRange.getValues();
-
-    var strFrom = sheet.getRange(1,2).getValue();
-
-    var docBaseID = sheet.getRange(2,2).getValue();
-    var docVariableID = sheet.getRange(3,2).getValue();
-
-    var accountingMonth = sheet.getRange(4,2).getValue();
-    var strFixedSubject = sheet.getRange(5,2).getValue();
-
-    // テンプレートテキストの取得  
-    var docBaseTemplate = DocumentApp.openById(docBaseID);
-    var strBaseTemplate = docBaseTemplate.getBody().getText();
-
-    for (var i = 0; i < data.length; i++) {
-        var row = data[i];
-        row.rowNumber = i + startRow;
-
-        // Result列がブランクであれば処理を実行    
-        if (!row[10]) { 
-            var result = "";
-
-            try
-            {
-                var strTo = row[0];
-                var strCc = row[1];
-                
-                // 使うか確認？
-                var strDestinationSubject = row[2];
-
-                // メールの件名を作成
-                var strSubject = strFixedSubject + "（" + accountingMonth + "月分）";
-
-                var options = {};
-                options.cc = strCc;
-                options.from = strFrom;
-
-                // メールの変数を取得
-                var strVal1 = row[3];
-                var strVal2 = row[4];
-                
-                // メールのbase部分の変数を置換
-                var strBody = strBaseTemplate.replace("\{VALUE1\}",strVal1).replace("\{VALUE2\}",strVal2); 
-
-                // メールの表のヘッダーを作成
-                var strVariable = "請求書日付　支払先　金額　内容　ステータス\n";
-
-                // メールの表の可変部分の変数を取得
-                var strVal4 = row[5];
-                var strVal5 = row[6];
-                var strVal6 = row[7];
-                var strVal7 = row[8];
-                var strVal8 = row[9];
-
-                var strVariable = strVariable + strVal4 + "　" + strVal5 + "　" + strVal6 + "　" + strVal7 + "　" + strVal8 + "\n";
-
-                while (data[i+1] != undefined && strTo == data[i+1][0]) {
-                    var strVal4 = data[i+1][5];
-                    var strVal5 = data[i+1][6];
-                    var strVal6 = data[i+1][7];
-                    var strVal7 = data[i+1][8];
-                    var strVal8 = data[i+1][9];
-
-                    var strVariable = strVariable + strVal4 + "　" + strVal5 + "　" + strVal6 + "　" + strVal7 + "　" + strVal8 + "\n";
-
-                    i = i + 1;
-                }
-
-                // メールのvariable部分の変数を置換
-                var strBody = strBody.replace("\{VALUE_variable\}",strVariable); 
-
-                // メール送信実行       
-                GmailApp.sendEmail(strTo,strSubject,strBody,options);
-
-                result = "Success"; 
-            }catch(e){
-                result = "Error:" + e;
-            }
-
-            // 実行結果をResult列にセット
-            sheet.getRange(row.rowNumber, lastColum).setValue(result); 
-        }
-    }  
-}
-
-function sendSeal() {
-    var sheet = ss.getSheetByName("検収チェックシート捺印");
-    var startRow = 6;
-    
-    var lastColum = sheet.getLastColumn();
-    var lastRow = sheet.getLastRow();
-    var numRows = lastRow - startRow + 1;
-
-    var dataRange = sheet.getRange(startRow, 1, numRows, lastColum);
-    var data = dataRange.getValues();
-
-    var strFrom = sheet.getRange(1,2).getValue();
-
-    var docBaseID = sheet.getRange(2,2).getValue();
-    var strSubject = sheet.getRange(3,2).getValue();
-
-    // テンプレートテキストの取得  
-    var docBaseTemplate = DocumentApp.openById(docBaseID);
-    var strBaseTemplate = docBaseTemplate.getBody().getText();
-
-    for (var i = 0; i < data.length; i++) {
-        var row = data[i];
-        row.rowNumber = i + startRow;
-
-        // Result列がブランクであれば処理を実行    
-        if (!row[5]) { 
-            var result = "";
-
-            try
-            {
-                var strTo = row[0];
-                var strCc = row[1];
-
-                var options = {};
-                options.cc = strCc;
-                options.from = strFrom;
-
-                // 変数を取得
-                var strVal1 = row[2];
-                var strVal2 = row[3];
-                var strVal3 = row[4];
-                
-                // メールの変数を置換
-                var strBody = strBaseTemplate.replace("\{VALUE1\}",strVal1).replace("\{VALUE2\}",strVal2).replace("\{VALUE3\}",strVal3); 
-
-                // メール送信実行       
-                GmailApp.sendEmail(strTo,strSubject,strBody,options);
-
-                result = "Success"; 
-            }catch(e){
-                result = "Error:" + e;
-            }
-
-            // 実行結果をResult列にセット
-            sheet.getRange(row.rowNumber, lastColum).setValue(result); 
-        }
-    }  
-}
-
-function sendNewSubcontractor() {
-    var sheet = ss.getSheetByName("新規取引外注先");
-    var startRow = 7;
-    
-    var lastColum = sheet.getLastColumn();
-    var lastRow = sheet.getLastRow();
-    var numRows = lastRow - startRow + 1;
-
-    var dataRange = sheet.getRange(startRow, 1, numRows, lastColum);
-    var data = dataRange.getValues();
-
-    var strFrom = sheet.getRange(1,2).getValue();
-
-    var docBaseID = sheet.getRange(2,2).getValue();
-    var docVariableID = sheet.getRange(3,2).getValue();
-
-    var strVal1 = sheet.getRange(4,2).getValue();
-    var strFixedSubject = sheet.getRange(5,2).getValue();
-
-    // テンプレートテキストの取得  
-    var docBaseTemplate = DocumentApp.openById(docBaseID);
-    var strBaseTemplate = docBaseTemplate.getBody().getText();
-
-    for (var i = 0; i < data.length; i++) {
-        var row = data[i];
-        row.rowNumber = i + startRow;
-
-        // Result列がブランクであれば処理を実行    
-        if (!row[10]) { 
-            var result = "";
-
-            try
-            {
-                var strTo = row[0];
-                var strCc = row[1];
-                
-                var strDestinationSubject = row[2];
-
-                // メールの件名を作成
-                var strSubject = "【" + strDestinationSubject + "】" + strFixedSubject;
-
-                var options = {};
-                options.cc = strCc;
-                options.from = strFrom;
-
-                // メールの変数を置換
-                var strBody = strBaseTemplate.replace("\{VALUE1\}",strVal1); 
-
-                // メールの表のヘッダーを作成
-                var strVariable = "個人or法人　提出先　正式名称\n";
-
-                // メールの表の可変部分の変数を取得
-                var strVal2 = row[3];
-                var strVal3 = row[4];
-                var strVal4 = row[5];
-
-                var strVariable = strVariable + strVal2 + "　" + strVal3 + "　" + strVal4 + "\n";
-
-                while (data[i+1] != undefined && strTo == data[i+1][0]) {
-                    var strVal2 = data[i+1][3];
-                    var strVal3 = data[i+1][4];
-                    var strVal4 = data[i+1][5];
-
-                    var strVariable = strVariable + strVal2 + "　" + strVal3 + "　" + strVal4 + "\n";
-
-                    i = i + 1;
-                }
-
                 // メールのvariable部分の変数を置換
                 var strBody = strBody.replace("\{VALUE_variable\}",strVariable); 
 
