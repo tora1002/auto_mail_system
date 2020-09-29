@@ -16,9 +16,12 @@ function onOpen() {
 }
 
 function sendReceiptMistakeHtml() {
+    var popup = Browser.msgBox("スクリプトを実行しますか？",Browser.Buttons.OK_CANCEL);
+    if (popup == "cancel") exit;
+    
     var sheet = ss.getSheetByName("領収書不備");
     var startRow = 6;
-    
+
     var lastColum = sheet.getLastColumn();
     var lastRow = sheet.getLastRow();
     var numRows = lastRow - startRow + 1;
@@ -107,6 +110,9 @@ function sendReceiptMistakeHtml() {
 }
 
 function sendBalanceCheckHtml() {
+    var popup = Browser.msgBox("スクリプトを実行しますか？",Browser.Buttons.OK_CANCEL);
+    if (popup == "cancel") exit;
+    
     var sheet = ss.getSheetByName("収支確認");
     var startRow = 5;
     
@@ -205,6 +211,9 @@ function sendBalanceCheckHtml() {
 }
 
 function sendNikkeiHtml() {
+    var popup = Browser.msgBox("スクリプトを実行しますか？",Browser.Buttons.OK_CANCEL);
+    if (popup == "cancel") exit;
+    
     var sheet = ss.getSheetByName("日経テレコン利用ID・PW変更");
     var startRow = 5;
     
@@ -270,6 +279,9 @@ function sendNikkeiHtml() {
 }
 
 function sendInvoiceMistakeHtml() {
+    var popup = Browser.msgBox("スクリプトを実行しますか？",Browser.Buttons.OK_CANCEL);
+    if (popup == "cancel") exit;
+    
     var sheet = ss.getSheetByName("未着・不備請求書");
     var startRow = 6;
     
@@ -389,6 +401,9 @@ function sendInvoiceMistakeHtml() {
 }
 
 function sendSealHtml() {
+    var popup = Browser.msgBox("スクリプトを実行しますか？",Browser.Buttons.OK_CANCEL);
+    if (popup == "cancel") exit;
+    
     var sheet = ss.getSheetByName("検収チェックシート捺印");
     var startRow = 5;
     
@@ -452,6 +467,9 @@ function sendSealHtml() {
 }
 
 function sendNewSubcontractorHtml() {
+    var popup = Browser.msgBox("スクリプトを実行しますか？",Browser.Buttons.OK_CANCEL);
+    if (popup == "cancel") exit;
+    
     var sheet = ss.getSheetByName("新規取引外注先");
     var startRow = 6;
     
@@ -547,6 +565,9 @@ function sendNewSubcontractorHtml() {
 }
 
 function sendInspectionBookHtml() {
+    var popup = Browser.msgBox("スクリプトを実行しますか？",Browser.Buttons.OK_CANCEL);
+    if (popup == "cancel") exit;
+    
     var sheet = ss.getSheetByName("検修書提出");
     var startRow = 5;
     
