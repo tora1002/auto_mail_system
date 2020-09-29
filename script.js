@@ -93,7 +93,7 @@ function sendReceiptMistakeHtml() {
                 options.htmlBody = html;
 
                 // メール送信実行       
-                GmailApp.sendEmail(strTo, strSubject, strBody, options);
+                GmailApp.sendEmail(strTo, strSubject, "", options);
 
                 result = "Success"; 
             }catch(e){
@@ -222,33 +222,32 @@ function sendNikkeiHtml() {
         row.rowNumber = i + startRow;
 
         // Result列がブランクであれば処理を実行    
-        if (!row[10]) { 
+        if (!row[7]) { 
             var result = "";
 
             try
             {
                 var strTo = row[0];
                 var strCc = row[1];
-                var strDestinationSubject = row[2];
 
                 // メールの件名を作成
-                var strSubject = "※重要【" + strDestinationSubject + "】" + strFixedSubject;
+                var strSubject = "※重要【" + row[2] + "】" + strFixedSubject;
                 
                 // メールの本文を作成
-                var html = "<div>" + row[3] + " さん</div>";
+                var html = "<div>" + row[2] + " 各位</div>";
                 html += "<br />";
                 html += "<div>お疲れ様です。</div>";
-                html += "<div>ベクトル管理部の" + row[4] + "です。</div>";
+                html += "<div>ベクトル管理部の" + row[3] + "です。</div>";
                 html += "<br />";
                 html += "<div>新事業年度部署編成に伴い、日経テレコン利用IDを各部署振り直しました。</div>";
-                html += "<div>本日（" + row[5] + "）より下記ID・パスワードにて日経テレコンをご利用ください。</div>";
+                html += "<div>本日（" + row[4] + "）より下記ID・パスワードにて日経テレコンをご利用ください。</div>";
                 html += "<div>※IDに変更のなかったチームもパスワードは変更しております。</div>";
                 html += "<br />";
-                html += "<div>" + row[6] + "</div>";
-                html += "<div>ID： " + row[7] + "</div>";
-                html += "<div>PW： " + row[8] + "</div>";
+                html += "<div>" + row[2] + "</div>";
+                html += "<div>ID： " + row[5] + "</div>";
+                html += "<div>PW： " + row[6] + "</div>";
                 html += "<br />";
-                html += "<div>何かございましたら " + row[4] + " までお問い合わせください。</div>";
+                html += "<div>何かございましたら " + row[3] + " までお問い合わせください。</div>";
                 html += "<div>以上、ご確認のほどよろしくお願いいたします。</div>";
 
                 var options = {};
@@ -400,7 +399,7 @@ function sendSealHtml() {
     var dataRange = sheet.getRange(startRow, 1, numRows, lastColum);
     var data = dataRange.getValues();
     var strFrom = sheet.getRange(1,2).getValue();
-    var strSubject = sheet.getRange(3,2).getValue();
+    var strSubject = sheet.getRange(2,2).getValue();
 
     for (var i = 0; i < data.length; i++) {
         var row = data[i];
@@ -419,7 +418,7 @@ function sendSealHtml() {
                 var strVal3 = row[4];
                 
                 // メールの本文を作成
-                var html = "<div>" + strVal1 + "</div>";
+                var html = "<div>" + strVal1 + " さん</div>";
                 html += "<br />";
                 html += "<div>お疲れ様です。</div>";
                 html += strVal2 + " 月収支表のご提出ありがとうございます。</div>";
