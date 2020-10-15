@@ -374,7 +374,7 @@ function sendInvoiceMistakeHtml() {
                 html += "<br />";
                 html += "<div>PDF請求書のみ発行している企業、個人の場合は、</div>";
                 html += "<div style='font-weight: bold; color: #FF0000;'>「原本」と記載して担当者の印鑑</p> を押してください。</div>";
-                html += "<div style='font-weight: bold; text-decoration: underline; background-color: #FFFF00;'>※ない場合は原本未着扱いとしてお支払いを致しません。</div>";
+                html += "<div style='font-weight: bold; text-decoration: underline;'><span style='background-color: #FFFF00;'>※ない場合は原本未着扱いとしてお支払いを致しません。</span></div>";
                 html += "<br />";
                 html += "<div>【宛名間違いの請求書とは・・・】</div>";
                 html += "<div>例えば、AN,PL,INで受注している案件に</div>";
