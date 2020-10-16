@@ -15,6 +15,18 @@ function onOpen() {
     menu.addToUi();
 }
 
+function numberFormat(number) {
+    return ("" + number).replace(/(\d)(?=(\d{3})+$)/g, '$1,');
+}
+
+function percentNumberFormat(number) {
+    return (number * 100).toFixed(1).toString() + "%";
+}
+
+function dateFormat(date) {
+    return Utilities.formatDate(date,"Asia/Tokyo","yyyy/MM/dd");
+}
+
 function sendReceiptMistakeHtml() {
     var popup = Browser.msgBox("スクリプトを実行しますか？",Browser.Buttons.OK_CANCEL);
     if (popup == "cancel") exit;
@@ -62,7 +74,7 @@ function sendReceiptMistakeHtml() {
                 html += "<div>また、連絡なく期限までにご提出いただけない場合、</div>";
                 html += "<div>翌月の経費精算より相殺させていただきます。</div>";
                 html += "<br />";
-                html += "<div>提出期限： " + row[5] + "</div>";
+                html += "<div>提出期限： " + dateFormat(row[5]) + "</div>";
                 html += "<div>提出先　： " + row[6] + "</div>";
                 html += "<br />";
                 
@@ -70,7 +82,7 @@ function sendReceiptMistakeHtml() {
                 html += "<div>========================================</div>";
                 html += "<br />";
                 html += "<div>支払先：　　" + row[7] +  "</div>";
-                html += "<div>金額：　　" + row[8] + "</div>";
+                html += "<div>金額：　　" + numberFormat(row[8]) + "</div>";
                 html += "<div>状態：　　" + row[9] + "</div>";
                 html += "<div>備考：　　" + row[10] + "</div>";
 
@@ -152,15 +164,15 @@ function sendBalanceCheckHtml() {
                 html += "<br />";
                 html += "<div>JOBNo：　　　" + row[5] +  "</div>";
                 html += "<div>案件名：　　" + row[6] + "</div>";
-                html += "<div>総利益率：　" + row[7] + "</div>";
-                html += "<div>売上計上日：" + row[8] + "</div>";
+                html += "<div>総利益率：　" + percentNumberFormat(row[7]) + "</div>";
+                html += "<div>売上計上日：" + dateFormat(row[8]) + "</div>";
 
                 while (data[i+1] != undefined && strTo == data[i+1][0]) {
                     html += "<br />";
                     html += "<div>JOBNo：　　　" + data[i+1][5] +  "</div>";
                     html += "<div>案件名：　　" + data[i+1][6] + "</div>";
-                    html += "<div>総利益率：　" + data[i+1][7] + "</div>";
-                    html += "<div>売上計上日：" + data[i+1][8] + "</div>";
+                    html += "<div>総利益率：　" + percentNumberFormat(data[i+1][7]) + "</div>";
+                    html += "<div>売上計上日：" + dateFormat(data[i+1][8]) + "</div>";
 
                     i = i + 1;
                 }
@@ -186,7 +198,7 @@ function sendBalanceCheckHtml() {
                 html += "<div>　　･金額：</div>";
                 html += "<div>　　･（zac登録済みの場合）JOBNo：</div>";
                 html += "<br />";
-                html += "<div>回答期日： " + row[4] + " まで</div>";
+                html += "<div>回答期日： " + dateFormat(row[4]) + " まで</div>";
                 html += "<br />";
                 html += "<div>お忙しいところ大変恐れ入りますが、</div>";
                 html += "<div>ご確認、ご返答の程宜しくお願い致します。</div>";
@@ -249,7 +261,7 @@ function sendNikkeiHtml() {
                 html += "<div>ベクトル管理部の" + row[3] + "です。</div>";
                 html += "<br />";
                 html += "<div>新事業年度部署編成に伴い、日経テレコン利用IDを各部署振り直しました。</div>";
-                html += "<div>本日（" + row[4] + "）より下記ID・パスワードにて日経テレコンをご利用ください。</div>";
+                html += "<div>本日（" + dateFormat(row[4]) + "）より下記ID・パスワードにて日経テレコンをご利用ください。</div>";
                 html += "<div>※IDに変更のなかったチームもパスワードは変更しております。</div>";
                 html += "<br />";
                 html += "<div>" + row[2] + "</div>";
@@ -301,7 +313,7 @@ function sendInvoiceMistakeHtml() {
         row.rowNumber = i + startRow;
 
         // Result列がブランクであれば処理を実行    
-        if (!row[10]) { 
+        if (!row[11]) { 
             var result = "";
 
             try
@@ -312,7 +324,7 @@ function sendInvoiceMistakeHtml() {
                 var strSubject = "【" + strDestinationSubject  + "】" + strFixedSubject + "（" + accountingMonth + "月分）";
 
                 // メールの変数を取得
-                var strVal1 = row[3];
+                var strVal1 = dateFormat(row[3]);
                 var strVal2 = row[4];
 
                 // メールの本文を作成
@@ -331,6 +343,7 @@ function sendInvoiceMistakeHtml() {
                 // 表の見出し部分を作成
                 html += "<table style='border-collapse:collapse;'>";
                 html += "<tr bgcolor='#ffffc0'>";
+                html += "<th style='border:1px solid #ccc; padding:10px;'>受託会社</th>";
                 html += "<th style='border:1px solid #ccc; padding:10px;'>請求書日付</th>";
                 html += "<th style='border:1px solid #ccc; padding:10px;'>支払先</th>";
                 html += "<th style='border:1px solid #ccc; padding:10px;'>金額</th>";
@@ -341,19 +354,21 @@ function sendInvoiceMistakeHtml() {
                 // 表のデータ部分を作成
                 html += "<tr>";
                 html += "<td style='border:1px solid #ccc; padding:10px;'>" + row[5] + "</td>";
-                html += "<td style='border:1px solid #ccc; padding:10px;'>" + row[6] + "</td>";
+                html += "<td style='border:1px solid #ccc; padding:10px;'>" + dateFormat(row[6]) + "</td>";
                 html += "<td style='border:1px solid #ccc; padding:10px;'>" + row[7] + "</td>";
-                html += "<td style='border:1px solid #ccc; padding:10px;'>" + row[8] + "</td>";
+                html += "<td style='border:1px solid #ccc; padding:10px; text-align: right;'>" + numberFormat(row[8]) + "</td>";
                 html += "<td style='border:1px solid #ccc; padding:10px;'>" + row[9] + "</td>";
+                html += "<td style='border:1px solid #ccc; padding:10px;'>" + row[10] + "</td>";
                 html += "</tr>";
 
                 while (data[i+1] != undefined && strTo == data[i+1][0]) {
                     html += "<tr>";
                     html += "<td style='border:1px solid #ccc; padding:10px;'>" + data[i+1][5] + "</td>";
-                    html += "<td style='border:1px solid #ccc; padding:10px;'>" + data[i+1][6] + "</td>";
+                    html += "<td style='border:1px solid #ccc; padding:10px;'>" + dateFormat(data[i+1][6]) + "</td>";
                     html += "<td style='border:1px solid #ccc; padding:10px;'>" + data[i+1][7] + "</td>";
-                    html += "<td style='border:1px solid #ccc; padding:10px;'>" + data[i+1][8] + "</td>";
+                    html += "<td style='border:1px solid #ccc; padding:10px; text-align: right;'>" + numberFormat(data[i+1][8]) + "</td>";
                     html += "<td style='border:1px solid #ccc; padding:10px;'>" + data[i+1][9] + "</td>";
+                    html += "<td style='border:1px solid #ccc; padding:10px;'>" + data[i+1][10] + "</td>";
                     html += "</tr>";
 
                     i = i + 1;
@@ -430,7 +445,7 @@ function sendSealHtml() {
                 var strCc = row[1];
                 var strVal1 = row[2];
                 var strVal2 = row[3];
-                var strVal3 = row[4];
+                var strVal3 = dateFormat(row[4]);
                 
                 // メールの本文を作成
                 var html = "<div>" + strVal1 + " さん</div>";
@@ -632,9 +647,9 @@ function sendInspectionBookHtml() {
                 html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + row[9] + "</td>";
                 html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + row[10] + "</td>";
                 html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + row[11] + "</td>";
-                html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + row[12] + "</td>";
-                html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + row[13] + "</td>";
-                html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + row[14] + "</td>";
+                html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + dateFormat(row[12]) + "</td>";
+                html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + dateFormat(row[13]) + "</td>";
+                html += "<td style='border:1px solid #ccc; padding:3px 5px; text-align: right;'>" + numberFormat(row[14]) + "</td>";
                 html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + row[15] + "</td>";
                 html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + row[16] + "</td>";
                 html += "</tr>";
@@ -648,9 +663,9 @@ function sendInspectionBookHtml() {
                     html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + data[i+1][9] + "</td>";
                     html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + data[i+1][10] + "</td>";
                     html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + data[i+1][11] + "</td>";
-                    html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + data[i+1][12] + "</td>";
-                    html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + data[i+1][13] + "</td>";
-                    html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + data[i+1][14] + "</td>";
+                    html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + dateFormat(data[i+1][12]) + "</td>";
+                    html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + dateFormat(data[i+1][13]) + "</td>";
+                    html += "<td style='border:1px solid #ccc; padding:3px 5px; text-align: right;'>" + numberFormat(data[i+1][14]) + "</td>";
                     html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + data[i+1][15] + "</td>";
                     html += "<td style='border:1px solid #ccc; padding:3px 5px;'>" + data[i+1][16] + "</td>";
                     html += "</tr>";
