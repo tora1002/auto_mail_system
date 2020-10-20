@@ -89,7 +89,7 @@ function sendReceiptMistakeHtml() {
                 while (data[i+1] != undefined && strTo == data[i+1][0]) {
                     html += "<br />";
                     html += "<div>支払先：　　" + data[i+1][7] +  "</div>";
-                    html += "<div>金額：　　" + data[i+1][8] + "</div>";
+                    html += "<div>金額：　　" + numberFormat(data[i+1][8]) + "</div>";
                     html += "<div>状態：　　" + data[i+1][9] + "</div>";
                     html += "<div>備考：　　" + data[i+1][10] + "</div>";
 
